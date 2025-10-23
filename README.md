@@ -40,7 +40,7 @@ Players can place, move, and delete furniture or storage props inside their ware
 
 1. Clone the resource:
    ```bash
-   git clone https://github.com/YOURUSERNAME/jlabs-warehouse.git
+   git clone https://github.com/cotejo/jlabs-warehouse.git
 2. SQL Will be automaticall generate by the server
 3. add items and pictures -> ox_inventory
 
