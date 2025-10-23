@@ -33,6 +33,7 @@ Players can place, move, and delete furniture or storage props inside their ware
 | **ox_inventory** | Inventory & stash system | [ox_inventory](https://github.com/overextended/ox_inventory) |
 | **oxmysql** | Database wrapper | [oxmysql](https://github.com/overextended/oxmysql) |
 | **qb-interior** | Interior shell system | [qb-interior](https://github.com/qbcore-framework/qb-interior) |
+| **illenium-appearance** | Clothing & wardrobe system | [illenium-appearance](https://github.com/iLLeniumStudios/illenium-appearance) |
 
 ---
 
