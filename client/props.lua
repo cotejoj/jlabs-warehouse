@@ -6,13 +6,60 @@ local confirmed = false
 local heading = 0.0
 local movingPropId = nil
 local currentWarehouse = nil
-
+local warehouseInteractionActive = false
 --------------------------------------------------------
 -- 📦 Warehouse Status
 --------------------------------------------------------
 RegisterNetEvent('jlabs-warehouse:client:setCurrentWarehouse', function(name)
     currentWarehouse = name
+
+    if name and not warehouseInteractionActive then
+        warehouseInteractionActive = true
+        CreateThread(function()
+            local uiActive = false
+            while currentWarehouse do
+                Wait(0)
+                local ped = PlayerPedId()
+                local pcoords = GetEntityCoords(ped)
+                local closestId, closestEnt, closestDist = nil, nil, 1.8
+
+                for propId, netId in pairs(GlobalProps) do
+                    if netId and netId ~= 0 then
+                        local ent = NetworkGetEntityFromNetworkId(netId)
+                        if ent and DoesEntityExist(ent) then
+                            local dist = #(pcoords - GetEntityCoords(ent))
+                            if dist < closestDist then
+                                closestId, closestEnt, closestDist = propId, ent, dist
+                            end
+                        end
+                    end
+                end
+
+                if closestEnt then
+                    if not uiActive then
+                        uiActive = true
+                        lib.showTextUI('[K] Pickup', {
+                            position = 'left-center',
+                            style = { background = '#ef1f43', color = 'white', borderRadius = 5 }
+                        })
+                    end
+
+                    if IsControlJustPressed(0, 311) then -- K key
+                        TriggerServerEvent('jlabs-warehouse:server:removeProp', closestId)
+                        Wait(300)
+                    end
+                elseif uiActive then
+                    uiActive = false
+                    lib.hideTextUI()
+                end
+            end
+            -- when leaving warehouse
+            lib.hideTextUI()
+            warehouseInteractionActive = false
+        end)
+    end
 end)
+
 
 RegisterNetEvent('jlabs-warehouse:client:clearCurrentWarehouse', function()
     currentWarehouse = nil
@@ -216,49 +263,6 @@ local function beginPlacement(model, itemName, propId)
         end
     end)
 end
-
---------------------------------------------------------
--- ⚙️ Interaction Loop (Pickup/Delete)
---------------------------------------------------------
-CreateThread(function()
-    local uiActive = false
-    while true do
-        Wait(0)
-        local ped = PlayerPedId()
-        local pcoords = GetEntityCoords(ped)
-        local closestId, closestEnt, closestDist = nil, nil, 1.8
-
-        for propId, netId in pairs(GlobalProps) do
-            if netId and netId ~= 0 then
-                local ent = NetworkGetEntityFromNetworkId(netId)
-                if ent and DoesEntityExist(ent) then
-                    local dist = #(pcoords - GetEntityCoords(ent))
-                    if dist < closestDist then
-                        closestId, closestEnt, closestDist = propId, ent, dist
-                    end
-                end
-            end
-        end
-
-        if closestEnt then
-            if not uiActive then
-                uiActive = true
-                lib.showTextUI('[K] Pickup', {
-                    position = 'left-center',
-                    style = { background = '#ef1f43', color = 'white', borderRadius = 5 }
-                })
-            end
-
-            if IsControlJustPressed(0, 311) then -- K key
-                TriggerServerEvent('jlabs-warehouse:server:removeProp', closestId)
-                Wait(300)
-            end
-        elseif uiActive then
-            uiActive = false
-            lib.hideTextUI()
-        end
-    end
-end)
 
 --------------------------------------------------------
 -- 🧪 Test Command

@@ -239,19 +239,26 @@ RegisterNetEvent('jlabs-warehouse:server:openStash', function(propId, label, slo
 end)
 
 --------------------------------------------------------
--- 🧱 Restore Props (on join / restart)
+-- 🗄️ Load all warehouse props when entering
 --------------------------------------------------------
-RegisterNetEvent('jlabs-warehouse:server:requestProps', function()
+RegisterNetEvent('jlabs-warehouse:server:loadWarehouseProps', function(warehouseName)
     local src = source
-    local rows = MySQL.query.await('SELECT * FROM jlabs_warehouse_props')
-    for _, prop in ipairs(rows or {}) do
-        spawnProp(prop)
-    end
-end)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer then return end
 
-AddEventHandler('playerJoining', function(playerId)
-    local rows = MySQL.query.await('SELECT * FROM jlabs_warehouse_props')
-    for _, prop in ipairs(rows or {}) do
-        spawnProp(prop)
-    end
+    MySQL.query('SELECT * FROM jlabs_warehouse_props WHERE warehouse_name = ?', { warehouseName }, function(results)
+        if not results or #results == 0 then
+            print(('[JLABS] No props found for warehouse "%s"'):format(warehouseName))
+            return
+        end
+
+        for _, v in ipairs(results) do
+            TriggerClientEvent('jlabs-warehouse:client:spawnProp', src, {
+                id = v.id,
+                model = v.model,
+                pos = { x = v.pos_x, y = v.pos_y, z = v.pos_z },
+                rot = { x = v.rot_x, y = v.rot_y, z = v.rot_z }
+            })
+        end
+    end)
 end)

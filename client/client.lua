@@ -204,6 +204,7 @@ RegisterNetEvent('jlabs-warehouse:client:enterWarehouse', function(warehouseName
     local exitPoint = vector3(spawnPos.x + exitOffset.x, spawnPos.y + exitOffset.y, spawnPos.z + exitOffset.z)
 
     TriggerEvent('jlabs-warehouse:client:setCurrentWarehouse', warehouseName)
+    TriggerServerEvent('jlabs-warehouse:server:loadWarehouseProps', warehouseName)
     local insideWarehouse = true
     CreateThread(function()
         local textShown = false
